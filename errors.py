@@ -1,18 +1,21 @@
-class InputFileDoesNotExist(Exception):
+class FFMpegException(Exception):
+    pass
+
+class InputFileDoesNotExist(FFMpegException):
     pass
 
 
-class CommandError(Exception):
+class CommandError(FFMpegException):
     pass
 
 
-class UnknownFormat(Exception):
+class UnknownFormat(FFMpegException):
     pass
 
 
-class UnreadableFile(Exception):
+class UnreadableFile(FFMpegException):
     pass
 
 
-class CantOverwrite(Exception):
+class CantOverwrite(FFMpegException):
     pass

@@ -1,6 +1,6 @@
 import os
 import re
-import commands
+import subprocess
 
 from errors import CommandError
 from errors import UnknownFormat
@@ -20,11 +20,13 @@ class VideoInspector(object):
         self.path = os.path.dirname(video_source)
         self.full_filename = video_source
 
-        self._exec_response = commands.getoutput("%s -i %s" % (
+        output = subprocess.Popen('%s -i "%s"' % (
             ffmpeg_bin,
             self.full_filename
-        ))
+        ), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True).communicate()
 
+        self._exec_response = output[1]
+        
         if re.search(
             ".*command\snot\sfound",
             self._exec_response,
@@ -87,6 +89,13 @@ class VideoInspector(object):
             self._metadata
         ).group(1)
 
+    def dimension(self):
+        matching = re.search(
+            r'([0-9]{3,4})x([0-9]{3,4})',
+            self._exec_response
+        )
+        return [matching.group(1),matching.group(2)]
+
     def raw_duration(self):
         return re.search(
             "Duration:\s*([0-9\:\.]+),",
@@ -97,9 +106,9 @@ class VideoInspector(object):
         if not self._valid:
             return
         units = self.raw_duration().split(":")
-        return (int(units[0]) * 60 * 60 * 1000) + \
-            (int(units[1]) * 60 * 1000) + \
-            int(float(units[2]) * 1000)
+        return (int(units[0]) * 60 * 60) + \
+            (int(units[1]) * 60) + \
+            int(float(units[2]))
 
     def _bitrate_match(self):
         return re.search("bitrate: ([0-9\.]+)\s*(.*)\s+", self._metadata)

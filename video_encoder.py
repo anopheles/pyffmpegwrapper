@@ -1,5 +1,4 @@
 import subprocess
-import fcntl
 import select
 import os
 import re
@@ -39,14 +38,6 @@ class VideoEncoder(object):
         }
         if progress_callback:
             cmd = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
-            fcntl.fcntl(
-                cmd.stderr.fileno(),
-                fcntl.F_SETFL,
-                fcntl.fcntl(
-                    cmd.stderr.fileno(),
-                    fcntl.F_GETFL
-                ) | os.O_NONBLOCK,
-            )
 
             duration = None
             header = ""
@@ -96,9 +87,9 @@ class VideoEncoder(object):
                             )
                             if raw_duration:
                                 units = raw_duration.group(1).split(":")
-                                duration = (int(units[0]) * 60 * 60 * 1000) + \
-                                    (int(units[1]) * 60 * 1000) + \
-                                    int(float(units[2]) * 1000)
+                                duration = (int(units[0]) * 60 * 60) + \
+                                    (int(units[1]) * 60) + \
+                                    int(float(units[2]))
 
                         if duration and progress_callback:
                             progress_callback(
@@ -109,4 +100,5 @@ class VideoEncoder(object):
                     else:
                         header += line
         else:
-            cmd = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
+            cmd = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
+            cmd.wait()
