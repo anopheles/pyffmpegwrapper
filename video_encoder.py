@@ -100,5 +100,4 @@ class VideoEncoder(object):
                     else:
                         header += line
         else:
-            cmd = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
-            cmd.wait()
+            cmd = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE).communicate()
